@@ -1,0 +1,33 @@
+apiVersion: serving.knative.dev/v1alpha1
+kind: Service
+metadata:
+  name: dmn-quarkus-example
+spec:
+  runLatest:
+    configuration:
+      build:
+        apiVersion: build.knative.dev/v1alpha1
+        kind: Build
+        spec:
+          serviceAccountName: build-bot
+          source:
+            git:
+              revision: dmn-quarkus-example
+              url: https://github.com/xiezhang7/submarine-examples
+          template:
+            arguments:
+              - name: IMAGE
+                value: xiezhang7/dmn-quarkus-example:0.1
+              - name: CONTEXT_DIR
+                value: /workspace/dmn-quarkus-example
+              - name: SUBMARINE_MAVEN_MIRROR
+                value: http://nexus-xz-nexus.app.middleware.ocp.cloud.lab.eng.bos.redhat.com/nexus/content/groups/public/
+            name: build-dmn-quarkus-example
+          timeout: 20m
+      revisionTemplate:
+        metadata:
+          labels:
+            app: dmn-quarkus-example
+        spec:
+          container:
+            image: xiezhang7/dmn-quarkus-example:0.1
