@@ -12,7 +12,7 @@ spec:
           serviceAccountName: build-bot
           source:
             git:
-              revision: dmn-quarkus-example
+              revision: dmn-example-1
               url: https://github.com/xiezhang7/submarine-examples
           template:
             arguments:
