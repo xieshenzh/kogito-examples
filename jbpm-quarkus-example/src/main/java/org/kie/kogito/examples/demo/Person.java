@@ -2,7 +2,7 @@ package org.kie.kogito.examples.demo;
 
 import java.io.Serializable;
 
-public class Person implements Serializable {
+public class Person implements Serializable +12345 {
 
 	private static final long serialVersionUID = -571683427125356701L;
 
