@@ -1,14 +1,62 @@
-# Kogito with persistence and transaction powered by MongoDB and Quarkus
+# Kogito with persistence and events strong consistency powered by Quarkus, MongoDB, Debezium and Kafka
 
 ## Description
 
-This example shows how to enable storing Kogito process data and publishing Kogito events of the same unit of work within one MongoDB transaction.
+This example shows how to enable storing Kogito process data and events to MongoDB.
 
-With the approach, the Kogito event consistency issue can be solved by implementing the outbox pattern with Debezium.
+By doing so, it allows demonstrating how to use the outbox pattern with Debezium, which then reads these events and publishes to Kafka.
 
-For the complete example of the outbox pattern, please refer to the [process-outbox-mongodb-debezium](../process-outbox-mongodb-debezium) example.
+## Run the Examples End-to-End
 
-## Installing and Running
+1. Set Debezium version
+```shell
+export DEBEZIUM_VERSION=1.7
+```
+
+2. Build the customized MongoDB image
+```shell
+docker build -f debezium/docker-mongo/Dockerfile -t example-mongodb-4.4:${DEBEZIUM_VERSION} debezium/docker-mongo
+```
+
+3. Deploy MongoDB, Debezium and Kafka
+```shell
+docker-compose -f debezium/docker-compose-mongodb.yaml up
+```
+
+4. Initialize MongoDB replica set and insert some test data
+```shell
+docker-compose -f debezium/docker-compose-mongodb.yaml exec mongodb bash -c '/usr/local/bin/init-kogito.sh'
+```
+
+5. Start MongoDB connector
+```shell
+curl -i -X POST -H "Accept:application/json" -H  "Content-Type:application/json" http://localhost:8083/connectors/ -d @debezium/register-mongodb.json
+```
+
+6. Access the database via MongoDB client if needed
+```shell
+docker-compose -f debezium/docker-compose-mongodb.yaml exec mongodb bash -c 'mongo -u $MONGODB_USER -p $MONGODB_PASSWORD --authenticationDatabase admin kogito'
+```
+
+7. Run the [Kogito App](#run-kogito-app) and interact with the Kogito app (e.g. create an order) to generate some Kogito events
+
+8. Consume messages from an event topic
+```shell
+docker-compose -f debezium/docker-compose-mongodb.yaml exec kafka /kafka/bin/kafka-console-consumer.sh \
+    --bootstrap-server kafka:9092 \
+    --from-beginning \
+    --property print.key=false \
+    --topic kogito-processinstances-events
+```
+
+9. With the Kafka broker info from step 8, run the Kogito Data Index Service with MongoDB to consume Kafka messages: https://github.com/kiegroup/kogito-runtimes/wiki/Data-Index-Service
+
+10. Shut down the cluster
+```shell
+docker-compose -f debezium/docker-compose-mongodb.yaml down
+```
+
+## Run Kogito App
 
 ### Compile and Run in Local Dev Mode
 
@@ -223,3 +271,11 @@ Example response:
   }
 }
 ```
+
+## References
+
+**Outbox pattern**: https://debezium.io/blog/2019/02/19/reliable-microservices-data-exchange-with-the-outbox-pattern/
+
+**debezium-examples:** https://github.com/debezium/debezium-examples/blob/master/tutorial/README.md#using-mongodb
+
+**debezium-images:** https://github.com/debezium/docker-images/tree/master/examples/mongodb/
