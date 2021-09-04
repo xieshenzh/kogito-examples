@@ -6,7 +6,9 @@ This example shows how to enable storing Kogito process data and events to Mongo
 
 By doing so, it allows demonstrating how to use the outbox pattern with Debezium, which then reads these events and publishes to Kafka.
 
-## Run the Examples End-to-End
+<p align="center"><img src="docs/images/kogito_persistence_events_consistency.png"></p>
+
+## Run the Example End-to-End
 
 1. Set Debezium version
 ```shell
