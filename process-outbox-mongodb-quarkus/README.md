@@ -10,24 +10,9 @@ By doing so, it allows demonstrating how to use the outbox pattern with Debezium
 
 ## Run the Example End-to-End
 
-1. Set Debezium version
+1. Deploy MongoDB, Debezium and Kafka
 ```shell
-export DEBEZIUM_VERSION=1.7
-```
-
-2. Build the customized MongoDB image
-```shell
-docker build -f debezium/docker-mongo/Dockerfile -t example-mongodb-4.4:${DEBEZIUM_VERSION} debezium/docker-mongo
-```
-
-3. Deploy MongoDB, Debezium and Kafka
-```shell
-docker-compose -f debezium/docker-compose-mongodb.yaml up
-```
-
-4. Initialize MongoDB replica set and insert some test data
-```shell
-docker-compose -f debezium/docker-compose-mongodb.yaml exec mongodb bash -c '/usr/local/bin/init-kogito.sh'
+docker-compose up
 ```
 
 5. Start MongoDB connector
@@ -37,10 +22,10 @@ curl -i -X POST -H "Accept:application/json" -H  "Content-Type:application/json"
 
 6. Access the database via MongoDB client if needed
 ```shell
-docker-compose -f debezium/docker-compose-mongodb.yaml exec mongodb bash -c 'mongo -u $MONGODB_USER -p $MONGODB_PASSWORD --authenticationDatabase admin kogito'
+docker-compose exec mongodb bash -c 'mongo -u $MONGODB_USER -p $MONGODB_PASSWORD --authenticationDatabase admin kogito'
 ```
 
-7. Run the [Kogito App](#run-kogito-app) and interact with the Kogito app (e.g. create an order) to generate some Kogito events
+7. Interact with the [Kogito App](#kogito-app-example-usage) (e.g. create an order) and generate some Kogito events
 
 8. Consume messages from an event topic
 ```shell
@@ -58,24 +43,7 @@ docker-compose -f debezium/docker-compose-mongodb.yaml exec kafka /kafka/bin/kaf
 docker-compose -f debezium/docker-compose-mongodb.yaml down
 ```
 
-## Run Kogito App
-
-### Compile and Run in Local Dev Mode
-
-```
-mvn clean compile quarkus:dev
-```
-
-## OpenAPI (Swagger) documentation
-[Specification at swagger.io](https://swagger.io/docs/specification/about/)
-
-You can take a look at the [OpenAPI definition](http://localhost:8080/openapi?format=json) - automatically generated and included in this service - to determine all available operations exposed by this service. For easy readability you can visualize the OpenAPI definition file using a UI tool like for example available [Swagger UI](https://editor.swagger.io).
-
-In addition, various clients to interact with this service can be easily generated using this OpenAPI definition.
-
-When running in either Quarkus Development or Native mode, we also leverage the [Quarkus OpenAPI extension](https://quarkus.io/guides/openapi-swaggerui#use-swagger-ui-for-development) that exposes [Swagger UI](http://localhost:8080/swagger-ui/) that you can use to look at available REST endpoints and send test requests.
-
-## Example Usage
+## Kogito App Example Usage
 
 Once the service is up and running, you can use the following examples to interact with the service. Note that rather than using the curl commands below, you can also use the [Swagger UI](http://localhost:8080/swagger-ui/) to send requests.
 

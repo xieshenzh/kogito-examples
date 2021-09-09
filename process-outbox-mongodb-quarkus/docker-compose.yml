@@ -1,13 +1,13 @@
 version: '2'
 services:
   zookeeper:
-    image: debezium/zookeeper:${DEBEZIUM_VERSION}
+    image: debezium/zookeeper:1.7
     ports:
       - 2181:2181
       - 2888:2888
       - 3888:3888
   kafka:
-    image: debezium/kafka:${DEBEZIUM_VERSION}
+    image: debezium/kafka:1.7
     ports:
       - 9092:9092
     links:
@@ -15,7 +15,8 @@ services:
     environment:
       - ZOOKEEPER_CONNECT=zookeeper:2181
   mongodb:
-    image: example-mongodb-4.4:${DEBEZIUM_VERSION}
+    build: ./mongodb
+    image: kogito/debezium/mongodb:1.7
     hostname: mongodb
     ports:
       - 27017:27017
@@ -23,7 +24,8 @@ services:
       - MONGODB_USER=debezium
       - MONGODB_PASSWORD=dbz
   connect:
-    image: debezium/connect:${DEBEZIUM_VERSION}
+    build: ./debezium
+    image: kogito/debezium/connect:1.7
     ports:
       - 8083:8083
     links:

@@ -1,7 +1,5 @@
 FROM mongo:4.4
 
-LABEL maintainer="Debezium Community"
-
 COPY launch.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/launch.sh
 

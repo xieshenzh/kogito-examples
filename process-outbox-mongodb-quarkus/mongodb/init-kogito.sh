@@ -1,4 +1,4 @@
-sleep 5
+sleep 3
 
 HOSTNAME=`hostname`
 
@@ -19,6 +19,7 @@ echo "Using HOSTNAME='$HOSTNAME'"
 
 until mongo --eval "print(\"waited for connection\")"
   do
+    echo "Wait for connection"
     sleep 3
   done
 
@@ -57,7 +58,7 @@ mongo -u admin -p admin localhost:27017/admin <<-EOF
     });
 EOF
 
-echo "Created users"
+echo "Created test data"
 
 mongo -u debezium -p dbz --authenticationDatabase admin localhost:27017/kogito <<-EOF
     use kogito;
@@ -75,4 +76,4 @@ mongo -u debezium -p dbz --authenticationDatabase admin localhost:27017/kogito <
     ]);
 EOF
 
-echo "Inserted example data"
+echo "Inserted test data"
