@@ -1,3 +1,5 @@
+set -eu
+
 sleep 3
 
 HOSTNAME=`hostname`

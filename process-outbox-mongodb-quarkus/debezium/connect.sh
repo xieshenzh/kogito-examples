@@ -1,3 +1,5 @@
+set -eu
+
 until $(curl --output /dev/null --silent --head --fail $HOSTNAME:8083); do
     echo "Wait for Debezium"
     sleep 3

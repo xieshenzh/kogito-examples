@@ -14,6 +14,16 @@ services:
       - zookeeper
     environment:
       - ZOOKEEPER_CONNECT=zookeeper:2181
+  kafdrop:
+    image: obsidiandynamics/kafdrop
+    depends_on:
+      - kafka
+    ports:
+      - "9000:9000"
+    environment:
+      KAFKA_BROKERCONNECT: "kafka:9092"
+      JVM_OPTS: "-Xms32M -Xmx64M"
+      SERVER_SERVLET_CONTEXTPATH: "/"
   mongodb:
     build: ./mongodb
     image: kogito/debezium/mongodb:1.7
@@ -37,3 +47,12 @@ services:
       - CONFIG_STORAGE_TOPIC=my_connect_configs
       - OFFSET_STORAGE_TOPIC=my_connect_offsets
       - STATUS_STORAGE_TOPIC=my_connect_statuses
+  kogito:
+    build:
+      context: .
+      dockerfile: ./src/main/docker/Dockerfile.jvm
+    image: kogito
+    ports:
+      - 8080:8080
+    links:
+      - mongodb
