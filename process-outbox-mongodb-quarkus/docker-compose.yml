@@ -1,13 +1,13 @@
 version: '2'
 services:
   zookeeper:
-    image: debezium/zookeeper:1.7
+    image: debezium/zookeeper:${DEBEZIUM_VERSION}
     ports:
       - 2181:2181
       - 2888:2888
       - 3888:3888
   kafka:
-    image: debezium/kafka:1.7
+    image: debezium/kafka:${DEBEZIUM_VERSION}
     ports:
       - 9092:9092
     links:
@@ -26,16 +26,14 @@ services:
       SERVER_SERVLET_CONTEXTPATH: "/"
   mongodb:
     build: ./mongodb
-    image: kogito/debezium/mongodb:1.7
-    hostname: mongodb
+    image: kogito/debezium/mongodb
     ports:
       - 27017:27017
     environment:
       - MONGODB_USER=debezium
       - MONGODB_PASSWORD=dbz
   connect:
-    build: ./debezium
-    image: kogito/debezium/connect:1.7
+    image: debezium/connect:${DEBEZIUM_VERSION}
     ports:
       - 8083:8083
     links:
@@ -47,6 +45,17 @@ services:
       - CONFIG_STORAGE_TOPIC=my_connect_configs
       - OFFSET_STORAGE_TOPIC=my_connect_offsets
       - STATUS_STORAGE_TOPIC=my_connect_statuses
+  sidecar:
+    build: ./sidecar
+    image: kogito/debezium/sidecar
+    depends_on:
+      - mongodb
+      - connect
+    environment:
+      - MONGODB_HOSTNAME=mongodb
+      - MONGODB_PORT=27017
+      - CONNECT_HOSTNAME=connect
+      - CONNECT_PORT=8083
   kogito:
     build:
       context: .
@@ -56,3 +65,8 @@ services:
       - 8080:8080
     links:
       - mongodb
+    environment:
+      - QUARKUS_MONGODB_CONNECTION_STRING=mongodb://mongodb:27017
+      - QUARKUS_MONGODB_CREDENTIALS_USERNAME=debezium
+      - QUARKUS_MONGODB_CREDENTIALS_PASSWORD=dbz
+      - QUARKUS_MONGODB_CREDENTIALS_AUTH-SOURCE=admin
