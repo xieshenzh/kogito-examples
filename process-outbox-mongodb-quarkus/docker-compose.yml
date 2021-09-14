@@ -26,7 +26,8 @@ services:
       SERVER_SERVLET_CONTEXTPATH: "/"
   mongodb:
     build: ./mongodb
-    image: kogito/debezium/mongodb
+    image: kogito/outbox/mongodb
+    hostname: mongodb
     ports:
       - 27017:27017
     environment:
@@ -36,7 +37,7 @@ services:
     image: debezium/connect:${DEBEZIUM_VERSION}
     ports:
       - 8083:8083
-    links:
+    depends_on:
       - kafka
       - mongodb
     environment:
@@ -47,15 +48,15 @@ services:
       - STATUS_STORAGE_TOPIC=my_connect_statuses
   sidecar:
     build: ./sidecar
-    image: kogito/debezium/sidecar
+    image: kogito/outbox/sidecar
     depends_on:
-      - mongodb
       - connect
     environment:
-      - MONGODB_HOSTNAME=mongodb
-      - MONGODB_PORT=27017
-      - CONNECT_HOSTNAME=connect
-      - CONNECT_PORT=8083
+      - MONGODB_HOST=rs0/mongodb:27017
+      - MONGODB_USER=debezium
+      - MONGODB_PASSWORD=dbz
+      - KAFKA_HOST=kafka:9092
+      - CONNECT_HOST=connect:8083
   kogito:
     build:
       context: .
@@ -63,10 +64,10 @@ services:
     image: kogito
     ports:
       - 8080:8080
-    links:
+    depends_on:
       - mongodb
     environment:
       - QUARKUS_MONGODB_CONNECTION_STRING=mongodb://mongodb:27017
       - QUARKUS_MONGODB_CREDENTIALS_USERNAME=debezium
       - QUARKUS_MONGODB_CREDENTIALS_PASSWORD=dbz
-      - QUARKUS_MONGODB_CREDENTIALS_AUTH-SOURCE=admin
+      - QUARKUS_MONGODB_CREDENTIALS_AUTH_SOURCE=admin

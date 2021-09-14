@@ -1,6 +1,6 @@
-set -eu
+#!/bin/bash
 
-sleep 3
+set -euxo pipefail
 
 HOSTNAME=`hostname`
 
@@ -48,8 +48,8 @@ mongo -u admin -p admin localhost:27017/admin <<-EOF
     });
 
     db.createUser({
-        user: 'debezium',
-        pwd: 'dbz',
+        user: "$MONGODB_USER",
+        pwd: "$MONGODB_PASSWORD",
         roles: [
             { role: "readWrite", db: "kogito" },
             { role: "read", db: "local" },
@@ -62,7 +62,7 @@ EOF
 
 echo "Created test data"
 
-mongo -u debezium -p dbz --authenticationDatabase admin localhost:27017/kogito <<-EOF
+mongo -u "$MONGODB_USER" -p "$MONGODB_PASSWORD" --authenticationDatabase admin localhost:27017/kogito <<-EOF
     use kogito;
 
     db.test.insert([

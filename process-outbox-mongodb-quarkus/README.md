@@ -10,6 +10,11 @@ By doing so, it allows demonstrating how to use the outbox pattern with Debezium
 
 ## Run the Example End-to-End
 
+1. Set Debezium version
+```shell
+export DEBEZIUM_VERSION=1.7
+``
+
 1. Deploy MongoDB, Debezium and Kafka
 ```shell
 docker-compose up
