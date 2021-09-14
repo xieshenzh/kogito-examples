@@ -37,7 +37,7 @@ services:
     image: debezium/connect:${DEBEZIUM_VERSION}
     ports:
       - 8083:8083
-    depends_on:
+    links:
       - kafka
       - mongodb
     environment:

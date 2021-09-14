@@ -1,22 +1,32 @@
 version: '2'
 services:
   zookeeper:
-    image: debezium/zookeeper:1.7
+    image: debezium/zookeeper:${DEBEZIUM_VERSION}
     ports:
       - 2181:2181
       - 2888:2888
       - 3888:3888
   kafka:
-    image: debezium/kafka:1.7
+    image: debezium/kafka:${DEBEZIUM_VERSION}
     ports:
       - 9092:9092
     links:
       - zookeeper
     environment:
       - ZOOKEEPER_CONNECT=zookeeper:2181
+  kafdrop:
+    image: obsidiandynamics/kafdrop
+    depends_on:
+      - kafka
+    ports:
+      - "9000:9000"
+    environment:
+      KAFKA_BROKERCONNECT: "kafka:9092"
+      JVM_OPTS: "-Xms32M -Xmx64M"
+      SERVER_SERVLET_CONTEXTPATH: "/"
   mongodb:
     build: ./mongodb
-    image: kogito/debezium/mongodb:1.7
+    image: kogito/outbox/mongodb
     hostname: mongodb
     ports:
       - 27017:27017
@@ -24,8 +34,7 @@ services:
       - MONGODB_USER=debezium
       - MONGODB_PASSWORD=dbz
   connect:
-    build: ./debezium
-    image: kogito/debezium/connect:1.7
+    image: debezium/connect:${DEBEZIUM_VERSION}
     ports:
       - 8083:8083
     links:
@@ -37,3 +46,28 @@ services:
       - CONFIG_STORAGE_TOPIC=my_connect_configs
       - OFFSET_STORAGE_TOPIC=my_connect_offsets
       - STATUS_STORAGE_TOPIC=my_connect_statuses
+  sidecar:
+    build: ./sidecar
+    image: kogito/outbox/sidecar
+    depends_on:
+      - connect
+    environment:
+      - MONGODB_HOST=rs0/mongodb:27017
+      - MONGODB_USER=debezium
+      - MONGODB_PASSWORD=dbz
+      - KAFKA_HOST=kafka:9092
+      - CONNECT_HOST=connect:8083
+  kogito:
+    build:
+      context: .
+      dockerfile: ./src/main/docker/Dockerfile
+    image: kogito
+    ports:
+      - 8080:8080
+    depends_on:
+      - mongodb
+    environment:
+      - MONGODB_HOST=mongodb:27017
+      - MONGODB_USERNAME=debezium
+      - MONGODB_PASSWORD=dbz
+      - MONGODB_AUTH_SOURCE=admin
