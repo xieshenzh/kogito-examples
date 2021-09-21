@@ -15,12 +15,11 @@
 
     <properties>
         <tests.category>persistence</tests.category>
-        <enable.resource.mongodb>true</enable.resource.mongodb>
-        <container.image.mongodb>mongo:4.4</container.image.mongodb>
         <quarkus-plugin.version>2.1.0.Final</quarkus-plugin.version>
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
         <quarkus.platform.group-id>io.quarkus</quarkus.platform.group-id>
         <quarkus.platform.version>2.1.0.Final</quarkus.platform.version>
+        <DEBEZIUM_VERSION>1.7</DEBEZIUM_VERSION>
     </properties>
 
     <dependencyManagement>
@@ -106,6 +105,53 @@
                     <execution>
                         <goals>
                             <goal>build</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <configuration>
+                    <systemPropertyVariables>
+                        <kogito.port>${KOGITO_PORT}</kogito.port>
+                        <debezium.port>${DEBEZIUM_PORT}</debezium.port>
+                        <mongodb.port>${MONGODB_PORT}</mongodb.port>
+                        <kafdrop.port>${KAFDROP_PORT}</kafdrop.port>
+                        <kafka.port>${KAFKA_PORT}</kafka.port>
+                        <zookeeper.port>${ZOOKEEPER_PORT}</zookeeper.port>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <configuration>
+                    <images>
+                        <image>
+                            <external>
+                                <type>compose</type>
+                                <basedir>.</basedir>
+                                <composeFile>docker-compose.yml</composeFile>
+                            </external>
+                        </image>
+                    </images>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>start</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>build</goal>
+                            <goal>start</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>stop</id>
+                        <phase>post-integration-test</phase>
+                        <goals>
+                            <goal>stop</goal>
+                            <goal>remove</goal>
                         </goals>
                     </execution>
                 </executions>

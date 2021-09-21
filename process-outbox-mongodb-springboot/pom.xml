@@ -15,8 +15,6 @@
 
     <properties>
         <tests.category>persistence</tests.category>
-        <enable.resource.mongodb>true</enable.resource.mongodb>
-        <container.image.mongodb>mongo:4.4</container.image.mongodb>
     </properties>
 
     <dependencyManagement>
@@ -105,23 +103,6 @@
                     <execution>
                         <goals>
                             <goal>repackage</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-failsafe-plugin</artifactId>
-                <configuration>
-                    <systemPropertyVariables combine.children="append">
-                        <container.image.mongodb>${container.image.mongodb}</container.image.mongodb>
-                    </systemPropertyVariables>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>integration-test</goal>
-                            <goal>verify</goal>
                         </goals>
                     </execution>
                 </executions>

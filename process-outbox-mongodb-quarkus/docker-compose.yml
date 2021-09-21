@@ -3,23 +3,21 @@ services:
   zookeeper:
     image: debezium/zookeeper:${DEBEZIUM_VERSION}
     ports:
-      - 2181:2181
-      - 2888:2888
-      - 3888:3888
+      - ${ZOOKEEPER_PORT}:2181
   kafka:
     image: debezium/kafka:${DEBEZIUM_VERSION}
     ports:
-      - 9092:9092
+      - ${KAFKA_PORT}:9092
     links:
       - zookeeper
     environment:
       - ZOOKEEPER_CONNECT=zookeeper:2181
   kafdrop:
     image: obsidiandynamics/kafdrop
+    ports:
+      - ${KAFDROP_PORT}:9000
     depends_on:
       - kafka
-    ports:
-      - "9000:9000"
     environment:
       KAFKA_BROKERCONNECT: "kafka:9092"
       JVM_OPTS: "-Xms32M -Xmx64M"
@@ -29,14 +27,14 @@ services:
     image: kogito/outbox/mongodb
     hostname: mongodb
     ports:
-      - 27017:27017
+      - ${MONGODB_PORT}:27017
     environment:
       - MONGODB_USER=debezium
       - MONGODB_PASSWORD=dbz
   connect:
     image: debezium/connect:${DEBEZIUM_VERSION}
     ports:
-      - 8083:8083
+      - ${DEBEZIUM_PORT}:8083
     links:
       - kafka
       - mongodb
@@ -51,23 +49,24 @@ services:
     image: kogito/outbox/sidecar
     depends_on:
       - connect
+      - mongodb
     environment:
       - MONGODB_HOST=rs0/mongodb:27017
       - MONGODB_USER=debezium
       - MONGODB_PASSWORD=dbz
       - KAFKA_HOST=kafka:9092
       - CONNECT_HOST=connect:8083
-  kogito:
-    build:
-      context: .
-      dockerfile: ./src/main/docker/Dockerfile.jvm
-    image: kogito
-    ports:
-      - 8080:8080
-    depends_on:
-      - mongodb
-    environment:
-      - QUARKUS_MONGODB_CONNECTION_STRING=mongodb://mongodb:27017
-      - QUARKUS_MONGODB_CREDENTIALS_USERNAME=debezium
-      - QUARKUS_MONGODB_CREDENTIALS_PASSWORD=dbz
-      - QUARKUS_MONGODB_CREDENTIALS_AUTH_SOURCE=admin
+#  kogito:
+#    build:
+#      context: .
+#      dockerfile: ./src/main/docker/Dockerfile.jvm
+#    image: kogito/outbox/quarkus
+#    ports:
+#      - ${KOGITO_PORT}:8080
+#    depends_on:
+#      - mongodb
+#    environment:
+#      - QUARKUS_MONGODB_CONNECTION_STRING=mongodb://mongodb:27017
+#      - QUARKUS_MONGODB_CREDENTIALS_USERNAME=debezium
+#      - QUARKUS_MONGODB_CREDENTIALS_PASSWORD=dbz
+#      - QUARKUS_MONGODB_CREDENTIALS_AUTH_SOURCE=admin
