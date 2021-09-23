@@ -65,12 +65,8 @@
         </dependency>
 
         <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-mongodb-client</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.kie.kogito</groupId>
-            <artifactId>kogito-addons-persistence-mongodb</artifactId>
+            <artifactId>kogito-addons-quarkus-persistence-mongodb</artifactId>
         </dependency>
         <dependency>
             <groupId>org.kie.kogito</groupId>
@@ -78,8 +74,8 @@
         </dependency>
 
         <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-junit5</artifactId>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -88,8 +84,28 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.kie.kogito</groupId>
-            <artifactId>kogito-quarkus-test-utils</artifactId>
+            <groupId>org.jboss.logging</groupId>
+            <artifactId>commons-logging-jboss-logging</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.awaitility</groupId>
+            <artifactId>awaitility</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-kafka-client</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-clients</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.jayway.jsonpath</groupId>
+            <artifactId>json-path</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -110,16 +126,43 @@
                 </executions>
             </plugin>
             <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-quarkus-app</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.basedir}/kogito/target/quarkus-app</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.basedir}/target/quarkus-app</directory>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-clean-plugin</artifactId>
+                <configuration>
+                    <filesets>
+                        <fileset>
+                            <directory>${project.basedir}/kogito/target</directory>
+                        </fileset>
+                    </filesets>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <configuration>
                     <systemPropertyVariables>
                         <kogito.port>${KOGITO_PORT}</kogito.port>
                         <debezium.port>${DEBEZIUM_PORT}</debezium.port>
-                        <mongodb.port>${MONGODB_PORT}</mongodb.port>
-                        <kafdrop.port>${KAFDROP_PORT}</kafdrop.port>
                         <kafka.port>${KAFKA_PORT}</kafka.port>
-                        <zookeeper.port>${ZOOKEEPER_PORT}</zookeeper.port>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>

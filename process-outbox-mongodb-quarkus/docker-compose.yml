@@ -10,12 +10,16 @@ services:
       - ${KAFKA_PORT}:9092
     links:
       - zookeeper
+    depends_on:
+      - zookeeper
     environment:
       - ZOOKEEPER_CONNECT=zookeeper:2181
   kafdrop:
     image: obsidiandynamics/kafdrop
     ports:
       - ${KAFDROP_PORT}:9000
+    links:
+      - kafka
     depends_on:
       - kafka
     environment:
@@ -38,6 +42,9 @@ services:
     links:
       - kafka
       - mongodb
+    depends_on:
+      - kafka
+      - mongodb
     environment:
       - BOOTSTRAP_SERVERS=kafka:9092
       - GROUP_ID=1
@@ -47,6 +54,9 @@ services:
   sidecar:
     build: ./sidecar
     image: kogito/outbox/sidecar
+    links:
+      - connect
+      - mongodb
     depends_on:
       - connect
       - mongodb
@@ -56,17 +66,17 @@ services:
       - MONGODB_PASSWORD=dbz
       - KAFKA_HOST=kafka:9092
       - CONNECT_HOST=connect:8083
-#  kogito:
-#    build:
-#      context: .
-#      dockerfile: ./src/main/docker/Dockerfile.jvm
-#    image: kogito/outbox/quarkus
-#    ports:
-#      - ${KOGITO_PORT}:8080
-#    depends_on:
-#      - mongodb
-#    environment:
-#      - QUARKUS_MONGODB_CONNECTION_STRING=mongodb://mongodb:27017
-#      - QUARKUS_MONGODB_CREDENTIALS_USERNAME=debezium
-#      - QUARKUS_MONGODB_CREDENTIALS_PASSWORD=dbz
-#      - QUARKUS_MONGODB_CREDENTIALS_AUTH_SOURCE=admin
+  kogito:
+    build: ./kogito
+    image: kogito/outbox/quarkus
+    ports:
+      - ${KOGITO_PORT}:8080
+    links:
+      - mongodb
+    depends_on:
+      - mongodb
+    environment:
+      - QUARKUS_MONGODB_CONNECTION_STRING=mongodb://mongodb:27017
+      - QUARKUS_MONGODB_CREDENTIALS_USERNAME=debezium
+      - QUARKUS_MONGODB_CREDENTIALS_PASSWORD=dbz
+      - QUARKUS_MONGODB_CREDENTIALS_AUTH_SOURCE=admin

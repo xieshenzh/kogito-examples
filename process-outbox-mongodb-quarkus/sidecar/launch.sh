@@ -13,6 +13,7 @@ curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" 
     "config": {
       "connector.class" : "io.debezium.connector.mongodb.MongoDbConnector",
       "tasks.max" : "1",
+      "connect.backoff.max.delay.ms" : "5000",
       "mongodb.hosts" : "$MONGODB_HOST",
       "mongodb.name" : "dbserver1",
       "mongodb.user" : "$MONGODB_USER",
