@@ -10,42 +10,37 @@ By doing so, it allows demonstrating how to use the outbox pattern with Debezium
 
 ## Run the Example End-to-End
 
-1. Set Debezium version
+1. Build the Kogito App
 ```shell
-export DEBEZIUM_VERSION=1.7
+mvn clean package
 ``
 
-1. Deploy MongoDB, Debezium and Kafka
+2. Deploy Kogito App, MongoDB, Debezium and Kafka
 ```shell
 docker-compose up
 ```
 
-5. Start MongoDB connector
+3. Check if Debezium is in `RUNNING` state
 ```shell
-curl -i -X POST -H "Accept:application/json" -H  "Content-Type:application/json" http://localhost:8083/connectors/ -d @debezium/register-mongodb.json
+curl http://localhost:8083/connectors/kogito-connector/status
 ```
 
-6. Access the database via MongoDB client if needed
+4. Interact with the [Kogito App](#kogito-app-example-usage) (e.g. create an order) and generate some Kogito events
 ```shell
-docker-compose exec mongodb bash -c 'mongo -u $MONGODB_USER -p $MONGODB_PASSWORD --authenticationDatabase admin kogito'
+curl -d '{"approver" : "john", "order" : {"orderNumber" : "12345", "shipped" : false}}' -H "Content-Type: application/json" -X POST http://localhost:8080/orders
 ```
 
-7. Interact with the [Kogito App](#kogito-app-example-usage) (e.g. create an order) and generate some Kogito events
+5. Browse the Kafka messages with Kafdrop web UI at `http://localhost:9000/`
 
-8. Consume messages from an event topic
+<p align="center"><img src="docs/images/kafdrop_web_ui.png"></p>
+
+<p align="center"><img src="docs/images/kafdrop_process_events_messages.png"></p>
+
+6. With the Kafka broker info from step 8, run the Kogito Data Index Service with MongoDB to consume Kafka messages: https://github.com/kiegroup/kogito-runtimes/wiki/Data-Index-Service
+
+7. Shut down the cluster
 ```shell
-docker-compose -f debezium/docker-compose-mongodb.yaml exec kafka /kafka/bin/kafka-console-consumer.sh \
-    --bootstrap-server kafka:9092 \
-    --from-beginning \
-    --property print.key=false \
-    --topic kogito-processinstances-events
-```
-
-9. With the Kafka broker info from step 8, run the Kogito Data Index Service with MongoDB to consume Kafka messages: https://github.com/kiegroup/kogito-runtimes/wiki/Data-Index-Service
-
-10. Shut down the cluster
-```shell
-docker-compose -f debezium/docker-compose-mongodb.yaml down
+docker-compose down
 ```
 
 ## Kogito App Example Usage
