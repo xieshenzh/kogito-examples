@@ -13,7 +13,7 @@ By doing so, it allows demonstrating how to use the outbox pattern with Debezium
 1. Build the Kogito App
 ```shell
 mvn clean package
-``
+```
 
 2. Deploy Kogito App, MongoDB, Debezium and Kafka
 ```shell
@@ -25,7 +25,7 @@ docker-compose up
 curl http://localhost:8083/connectors/kogito-connector/status
 ```
 
-4. Interact with the [Kogito App](#kogito-app-example-usage) (e.g. create an order) and generate some Kogito events
+4. [Interact with the Kogito App](#kogito-app-example-usage) (e.g. create an order) and generate some Kogito events
 ```shell
 curl -d '{"approver" : "john", "order" : {"orderNumber" : "12345", "shipped" : false}}' -H "Content-Type: application/json" -X POST http://localhost:8080/orders
 ```
