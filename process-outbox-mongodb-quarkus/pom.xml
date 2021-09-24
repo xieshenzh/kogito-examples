@@ -14,7 +14,6 @@
     <description>Process with MongoDB transaction - Quarkus</description>
 
     <properties>
-        <tests.category>persistence</tests.category>
         <quarkus-plugin.version>2.1.0.Final</quarkus-plugin.version>
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
         <quarkus.platform.group-id>io.quarkus</quarkus.platform.group-id>

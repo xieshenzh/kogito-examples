@@ -14,7 +14,6 @@
     <description>Kogito with MongoDB transaction - Spring Boot</description>
 
     <properties>
-        <tests.category>persistence</tests.category>
         <vertx.version>4.1.2</vertx.version>
         <DEBEZIUM_VERSION>1.7</DEBEZIUM_VERSION>
     </properties>
